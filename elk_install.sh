@@ -117,12 +117,12 @@ kibana(){
     TAR_FILE="$(basename "$KIBANA_URL")"
     curl -o "/tmp/$TAR_FILE" "$KIBANA_URL"
     
-    sudo tar xvf "/tmp/$TAR_FILE" -C /opt/
+    sudo tar xf "/tmp/$TAR_FILE" -C /opt/
     # bind to local host
     cat "/opt/${TAR_FILE%.tar.gz}/config/kibana.yml" | sed -r "s/^# (server.host: ).*/\1\"localhost\"/" > "/opt/${TAR_FILE%.tar.gz}/config/kibana.yml"
     chown -R kibana.kibana "/opt/${TAR_FILE%.tar.gz}"
 
-    ln -s "/opt/${TAR_FILE%.tar.gz}" /opt/kibana/
+    ln -s "/opt/${TAR_FILE%.tar.gz}" /opt/kibana
 
     # Set up Kibana init script
     curl -o /etc/init.d/kibana https://raw.githubusercontent.com/sky-uk/elk-bash-deploy/master/resource/kibana-4.x-init.sh
