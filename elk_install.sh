@@ -22,9 +22,15 @@ main() {
         exit 1
     fi
     if [ $RET_CODE -eq 0 ]; then
-        nginx
+        kibana
     else
         echo "$(date): Error installing logstash (line: $LINENO)"
+        exit 1
+    fi
+    if [ $RET_CODE -eq 0 ]; then
+        nginx
+    else
+        echo "$(date): Error installing kibana (line: $LINENO)"
         exit 1
     fi
 
