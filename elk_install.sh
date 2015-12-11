@@ -48,17 +48,17 @@ dependencies(){
 elasticsearch(){
     sleep 1
     echo "$(date): Installing elasticsearch (line: $LINENO)"
-    wget -qO - https://packages.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+    sudo wget -qO - https://packages.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
     echo "deb http://packages.elastic.co/elasticsearch/2.x/debian stable main" | sudo tee -a /etc/apt/sources.list.d/elasticsearch-2.x.list
     sudo apt-get update 2>&1 > /dev/null
     sudo apt-get -y install elasticsearch
     sudo update-rc.d elasticsearch defaults 95 10
     echo "$(date): Setting up ES data dirs ($LINENO)"
     if [ ! -d "$ES_DATA_DIR" ]; then
-        mkdir -p "$ES_DATA_DIR"
+        sudo mkdir -p "$ES_DATA_DIR"
     fi
     if [ ! -d "$ES_LOGS" ]; then
-        mkdir -p "$ES_LOGS"
+        sudo mkdir -p "$ES_LOGS"
     fi
     chown -R elasticsearch.elasticsearch "$ES_DATA_DIR"
     chown -R elasticsearch.elasticsearch "$ES_LOGS"
@@ -119,10 +119,10 @@ kibana(){
     ln -s "/opt/${TAR_FILE%.tar.gz}" /opt/kibana/
 
     # Set up Kibana init script
-    curl -o /etc/init.d/kibana https://raw.githubusercontent.com/sky-uk/elk-bash-deploy/master/kibana-4.x-init.sh
+    curl -o /etc/init.d/kibana https://raw.githubusercontent.com/sky-uk/elk-bash-deploy/master/resource/kibana-4.x-init.sh
     sudo chmod +x /etc/init.d/kibana
     sudo update-rc.d kibana defaults 97 10
-    curl -o /etc/default/kibana https://raw.githubusercontent.com/sky-uk/elk-bash-deploy/master/kibana-4.x-default
+    curl -o /etc/default/kibana https://raw.githubusercontent.com/sky-uk/elk-bash-deploy/master/resource/kibana-4.x-default
     sudo service kibana start
 }
 
@@ -130,7 +130,7 @@ nginx(){
     sleep 1
     echo "$(date): Installing kibana (line: $LINENO)"
     sudo apt-get -y install nginx apache2-utils
-    curl -o /etc/nginx/sites-available/default https://raw.githubusercontent.com/sky-uk/elk-bash-deploy/master/nginx_default
+    curl -o /etc/nginx/sites-available/default https://raw.githubusercontent.com/sky-uk/elk-bash-deploy/master/resource/nginx_default
     sudo /etc/init.d/nginx restart
 }
 
