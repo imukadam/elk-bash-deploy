@@ -5,6 +5,7 @@ ES_LOGS='/es/logs'
 
 # CPU Cores avalible to logstash (Total CPUs - 1)
 LS_CORES=$(expr $(lscpu|grep '^CPU(s):'|sed -r "s/^CPU\(s\):\s+([0-9]{,})/\1/") - 1)
+TOTAL_MEM=$(free -m | head -n2 | tail -1 | sed -r "s/Mem:\s+([0-9]{,})\s+.*/\1/")
 KIBANA_URL='https://download.elastic.co/kibana/kibana/kibana-4.3.0-linux-x64.tar.gz'
 
 main() {
@@ -75,6 +76,15 @@ elasticsearch(){
         echo "$(date): Could not find /etc/elasticsearch/elasticsearch.yml file (line: $LINENO)"
         exit 1
     fi
+    # Set ES heap size to 50% of total memeory
+    ES_HEAP_MEM="$(expr $(expr $TOTAL_MEM / 100) \* 50)"
+    if [ $ES_HEAP_MEM -gt 30000 ]; then
+        # Set it below the 30.5GB limit (https://www.elastic.co/guide/en/elasticsearch/guide/current/heap-sizing.html#compressed_oops)
+        ES_HEAP_MEM="30000m"
+    else
+        ES_HEAP_MEM="${ES_HEAP_MEM}m"
+    fi
+    cat /etc/init.d/elasticsearch | sed -r "s/^#(ES_HEAP_SIZE=)(.*)$/\1\"$ES_HEAP_MEM\"/" > /etc/init.d/elasticsearch
     sudo /etc/init.d/elasticsearch restart
     echo "$(date): Waiting on elasticsearch to start... (line: $LINENO)"
     sleep 10
@@ -99,7 +109,6 @@ logstash(){
             echo "$(date): $LS_CORES not set. Leaving as is (line: $LINENO)"
         fi
         # Set mem use to 25% of total memory
-        TOTAL_MEM=$(free -m | head -n2 | tail -1 | sed -r "s/Mem:\s+([0-9]{,})\s+.*/\1/")
         LS_HEAP_MEM="$(expr $(expr $TOTAL_MEM / 100) \* 25)m"
         cat /etc/default/logstash | sed -r "s/^#(LS_HEAP_SIZE=)\"(.*)\"$/\1\"$LS_HEAP_MEM\"/" > /etc/default/logstash
     else
