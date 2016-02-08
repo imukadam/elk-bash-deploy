@@ -84,7 +84,8 @@ elasticsearch(){
     else
         ES_HEAP_MEM="${ES_HEAP_MEM}m"
     fi
-    cat /etc/init.d/elasticsearch | sed -r "s/^#(ES_HEAP_SIZE=)(.*)$/\1\"$ES_HEAP_MEM\"/" > /etc/init.d/elasticsearch
+    cat /etc/init.d/elasticsearch | sed -r "s/^#(ES_HEAP_SIZE=)(.*)$/\1\"$ES_HEAP_MEM\"/" > /etc/init.d/elasticsearch_temp
+    mv /etc/init.d/elasticsearch_temp /etc/init.d/elasticsearch
     sudo /etc/init.d/elasticsearch restart
     echo "$(date): Waiting on elasticsearch to start... (line: $LINENO)"
     sleep 10
