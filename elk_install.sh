@@ -106,13 +106,16 @@ logstash(){
             unset LS_CORES
         fi
         if [ ! -z $LS_CORES ]; then
-            cat /etc/default/logstash | sed -r "s/^#(LS_OPTS=)\"(.*)\"$/\1\"-w $LS_CORES\"/" > /etc/default/logstash
+            cp /etc/default/logstash /etc/default/logstash.org
+            cat /etc/default/logstash | sed -r "s/^#(LS_OPTS=)\"(.*)\"$/\1\"-w $LS_CORES\"/" > /etc/default/logstash_temp
+            mv -v /etc/default/logstash_temp /etc/default/logstash
         else
             echo "$(date): $LS_CORES not set. Leaving as is (line: $LINENO)"
         fi
         # Set mem use to 25% of total memory
         LS_HEAP_MEM="$(expr $(expr $TOTAL_MEM / 100) \* 25)m"
-        cat /etc/default/logstash | sed -r "s/^#(LS_HEAP_SIZE=)\"(.*)\"$/\1\"$LS_HEAP_MEM\"/" > /etc/default/logstash
+        cat /etc/default/logstash | sed -r "s/^#(LS_HEAP_SIZE=)\"(.*)\"$/\1\"$LS_HEAP_MEM\"/" > /etc/default/logstash_temp
+        mv -v /etc/default/logstash_temp /etc/default/logstash
     else
         echo "$(date): Could not find /etc/default/logstash file (line: $LINENO)"
         exit 1
